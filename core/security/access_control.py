@@ -51,6 +51,12 @@ class ActionPrincipal(Principal):
         super().__init__(key="action", value=value, *args, **kwargs)
 
 
+@dataclass(frozen=True)
+class TeamPrincipal(Principal):
+    def __init__(self, value: str, *args, **kwargs) -> None:
+        super().__init__(key="team", value=value, *args, **kwargs)
+
+
 Everyone = SystemPrincipal(value="everyone")
 Authenticated = SystemPrincipal(value="authenticated")
 

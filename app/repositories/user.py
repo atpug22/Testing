@@ -20,11 +20,11 @@ class UserRepository(BaseRepository[User]):
         :param join_: Join relations.
         :return: User.
         """
-        query = await self._query(join_)
+        query = self._query(join_)
         query = query.filter(User.username == username)
 
         if join_ is not None:
-            return await self.all_unique(query)
+            return await self._all_unique(query)
 
         return await self._one_or_none(query)
 
@@ -38,11 +38,11 @@ class UserRepository(BaseRepository[User]):
         :param join_: Join relations.
         :return: User.
         """
-        query = await self._query(join_)
+        query = self._query(join_)
         query = query.filter(User.email == email)
 
         if join_ is not None:
-            return await self.all_unique(query)
+            return await self._all_unique(query)
    
         return await self._one_or_none(query)
 
@@ -54,5 +54,47 @@ class UserRepository(BaseRepository[User]):
         :return: Query.
         """
         return query.options(joinedload(User.tasks)).execution_options(
+            contains_joined_collection=True
+        )
+
+    def _join_teams(self, query: Select) -> Select:
+        """
+        Join teams (many-to-many relationship).
+
+        :param query: Query.
+        :return: Query.
+        """
+        return query.options(joinedload(User.teams)).execution_options(
+            contains_joined_collection=True
+        )
+
+    def _join_managed_teams(self, query: Select) -> Select:
+        """
+        Join managed teams.
+
+        :param query: Query.
+        :return: Query.
+        """
+        return query.options(joinedload(User.managed_teams)).execution_options(
+            contains_joined_collection=True
+        )
+
+    def _join_manager(self, query: Select) -> Select:
+        """
+        Join manager.
+
+        :param query: Query.
+        :return: Query.
+        """
+        return query.options(joinedload(User.manager))
+
+    def _join_direct_reports(self, query: Select) -> Select:
+        """
+        Join direct reports.
+
+        :param query: Query.
+        :return: Query.
+        """
+        return query.options(joinedload(User.direct_reports)).execution_options(
             contains_joined_collection=True
         )

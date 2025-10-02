@@ -31,7 +31,7 @@ class BaseController(Generic[ModelType]):
         )
         if not db_obj:
             raise NotFoundException(
-                f"{self.model_class.__tablename__.title()} with id: {id} does not exist"
+                f"{self.model_class.__tablename__.title()} with id: {id_} does not exist"
             )
 
         return db_obj
