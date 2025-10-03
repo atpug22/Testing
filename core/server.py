@@ -52,6 +52,7 @@ def make_middleware() -> List[Middleware]:
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
+            expose_headers=["Set-Cookie"],
         ),
         Middleware(
             AuthenticationMiddleware,

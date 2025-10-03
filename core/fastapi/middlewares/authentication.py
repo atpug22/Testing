@@ -16,6 +16,22 @@ class AuthBackend(AuthenticationBackend):
         self, conn: HTTPConnection
     ) -> Tuple[bool, Optional[CurrentUser]]:
         current_user = CurrentUser()
+        
+        # First, try cookie-based session authentication
+        session_id = conn.cookies.get("session_id")
+        if session_id:
+            try:
+                from app.integrations.github_oauth import get_session
+                session_data = get_session(session_id)
+                if session_data and "user" in session_data:
+                    user_id = session_data["user"].get("id")
+                    if user_id:
+                        current_user.id = user_id
+                        return True, current_user
+            except Exception:
+                pass  # Fall through to Bearer token authentication
+        
+        # Fall back to Bearer token authentication
         authorization: str = conn.headers.get("Authorization")
         if not authorization:
             return False, current_user
