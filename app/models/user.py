@@ -59,6 +59,22 @@ class User(Base, TimestampMixin):
         lazy="raise",
     )
 
+    # Organizations this user owns (one-to-many)
+    owned_organizations = relationship(
+        "Organization",
+        back_populates="owner",
+        foreign_keys="Organization.owner_id",
+        lazy="raise",
+    )
+
+    # Organizations this user is a member of (many-to-many)
+    organizations = relationship(
+        "Organization",
+        secondary="organization_members",
+        back_populates="members",
+        lazy="raise",
+    )
+
     # Teams this user is a member of (many-to-many)
     teams = relationship(
         "Team",
