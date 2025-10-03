@@ -10,9 +10,15 @@ from app.controllers import (
     TeamMemberController,
     UserController,
 )
-from app.models import Event, PullRequest, Task, Team, TeamMember, User
+from app.controllers.integration import GitHubIntegrationController
+from app.controllers.invitation import InvitationController
+from app.controllers.organization import OrganizationController
+from app.models import Event, PullRequest, Task, Team, TeamMember, User, Organization, GitHubIntegration, Invitation
 from app.repositories import (
     EventRepository,
+    GitHubIntegrationRepository,
+    InvitationRepository,
+    OrganizationRepository,
     PullRequestRepository,
     TaskRepository,
     TeamRepository,
@@ -35,6 +41,9 @@ class Factory:
     pull_request_repository = partial(PullRequestRepository, PullRequest)
     team_member_repository = partial(TeamMemberRepository, TeamMember)
     event_repository = partial(EventRepository, Event)
+    organization_repository = partial(OrganizationRepository, Organization)
+    integration_repository = partial(GitHubIntegrationRepository, GitHubIntegration)
+    invitation_repository = partial(InvitationRepository, Invitation)
 
     def get_user_controller(self, db_session=Depends(get_session)):
         return UserController(
@@ -66,4 +75,19 @@ class Factory:
             team_member_repository=self.team_member_repository(db_session=db_session),
             event_repository=self.event_repository(db_session=db_session),
             pr_repository=self.pull_request_repository(db_session=db_session),
+        )
+
+    def get_organization_controller(self, db_session=Depends(get_session)):
+        return OrganizationController(
+            organization_repository=self.organization_repository(db_session=db_session)
+        )
+
+    def get_integration_controller(self, db_session=Depends(get_session)):
+        return GitHubIntegrationController(
+            integration_repository=self.integration_repository(db_session=db_session)
+        )
+
+    def get_invitation_controller(self, db_session=Depends(get_session)):
+        return InvitationController(
+            invitation_repository=self.invitation_repository(db_session=db_session)
         )

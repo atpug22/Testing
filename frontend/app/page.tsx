@@ -26,6 +26,7 @@ export default function Home() {
   const handleEmailLogin = async (email: string, password: string) => {
     setLoading(true);
     try {
+      console.log('🔵 Attempting login...');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/v1'}/auth/email/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,15 +34,22 @@ export default function Home() {
         body: JSON.stringify({ email, password }),
       });
       
+      console.log('Response status:', response.status, response.ok);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Login successful:', data);
         // Login successful, refresh the page to update auth state
         window.location.reload();
       } else {
         const error = await response.json();
+        console.error('❌ Login failed:', error);
         alert(error.detail || 'Login failed');
       }
     } catch (error) {
-      alert('Login failed');
+      console.error('❌ Login error (likely CORS or network):', error);
+      alert(`Login failed: ${error instanceof Error ? error.message : 'Network error'}`);
     } finally {
       setLoading(false);
     }
@@ -177,87 +185,19 @@ export default function Home() {
     );
   }
 
+  // Redirect to onboarding if authenticated (onboarding page will redirect to dashboard if already set up)
+  if (isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/onboarding';
+    }
+    return null;
+  }
+
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Welcome back, {user?.login}!
-            </h1>
-            <p className="text-lg text-gray-600">
-              Select a repository to analyze your team's productivity
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <RepositoryPicker
-              onRepositorySelect={handleRepositorySelect}
-              onFetchData={handleFetchData}
-            />
-            
-            <PublicRepoFetcher
-              onDataFetched={handleFetchData}
-            />
-          </div>
-
-          <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Team Members
-            </h3>
-            <div className="grid md:grid-cols-4 gap-4">
-              <Link
-                href="/member/20"
-                className="p-4 bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
-              >
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-2 flex items-center justify-center text-white text-lg font-bold">
-                    S
-                  </div>
-                  <h4 className="font-medium text-gray-900">Sandy-1711</h4>
-                  <p className="text-sm text-blue-600">Balanced 🟢</p>
-                </div>
-              </Link>
-              <Link
-                href="/member/21"
-                className="p-4 bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
-              >
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mx-auto mb-2 flex items-center justify-center text-white text-lg font-bold">
-                    G
-                  </div>
-                  <h4 className="font-medium text-gray-900">guillaumejacquart</h4>
-                  <p className="text-sm text-purple-600">Balanced 🟢</p>
-                </div>
-              </Link>
-              <Link
-                href="/member/22"
-                className="p-4 bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
-              >
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full mx-auto mb-2 flex items-center justify-center text-white text-lg font-bold">
-                    Y
-                  </div>
-                  <h4 className="font-medium text-gray-900">yehorkardash</h4>
-                  <p className="text-sm text-green-600">Balanced 🟢</p>
-                </div>
-              </Link>
-              <Link
-                href="/member/13"
-                className="p-4 bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
-              >
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mx-auto mb-2 flex items-center justify-center text-white text-lg font-bold">
-                    A
-                  </div>
-                  <h4 className="font-medium text-gray-900">Alice Manager</h4>
-                  <p className="text-sm text-orange-600">Balanced 🟢</p>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Authentication flow for non-authenticated users is already handled above */}
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }
