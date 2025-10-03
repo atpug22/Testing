@@ -12,8 +12,7 @@ class UserBrief(BaseModel):
     email: Optional[str] = None
     avatar_url: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 # === KPI Tile Schemas ===
@@ -116,8 +115,7 @@ class PRCardBrief(BaseModel):
     reviewers: List[UserBrief] = []
     assigned_days_ago: Optional[int] = None  # For review assignments
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class PRsResponse(BaseModel):
@@ -139,8 +137,7 @@ class TimelineEvent(BaseModel):
     icon: str  # 💻, 🔄, ✅, 📝, etc.
     metadata: Optional[Dict[str, Any]] = {}
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class TimelineResponse(BaseModel):
@@ -174,6 +171,5 @@ class TeamMemberProfileResponse(BaseModel):
     reviews_pending_count: int
     unresolved_discussions_count: int
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 

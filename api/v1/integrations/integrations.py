@@ -94,17 +94,15 @@ async def create_github_integration(
         raise HTTPException(status_code=400, detail="Failed to validate GitHub token")
     
     # Create integration
-    integration = await integration_controller.create(
-        GitHubIntegration(
-            organization_id=organization_id,
-            access_token=request.access_token,
-            github_owner=github_owner,
-            selected_repos=[],
-            is_active=True,
-        )
-    )
+    integration = await integration_controller.create({
+        "organization_id": organization_id,
+        "access_token": request.access_token,
+        "github_owner": github_owner,
+        "selected_repos": [],
+        "is_active": True,
+    })
     
-    return integration
+    return GitHubIntegrationResponse.model_validate(integration)
 
 
 @integration_router.patch("/github/{organization_id}", dependencies=[Depends(AuthenticationRequired)])

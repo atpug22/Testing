@@ -11,5 +11,4 @@ class TaskResponse(BaseModel):
         ..., description="Task UUID", example="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
     )
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}

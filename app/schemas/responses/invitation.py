@@ -14,8 +14,7 @@ class InvitationResponse(BaseModel):
     expires_at: datetime
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class InvitationWithOrgResponse(BaseModel):
@@ -31,6 +30,5 @@ class InvitationWithOrgResponse(BaseModel):
     created_at: datetime
     invited_by_username: str | None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 

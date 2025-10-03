@@ -69,7 +69,7 @@ class BaseRepository(Generic[ModelType]):
 
         if unique:
             # For unique fields (like id), return a single object even with joins
-            return await self._one(query)
+            return await self._one_or_none(query)
         
         if join_ is not None:
             return await self._all_unique(query)
@@ -129,8 +129,8 @@ class BaseRepository(Generic[ModelType]):
 
     async def _one_or_none(self, query: Select) -> ModelType | None:
         """Returns the first result from the query or None."""
-        query = await self.session.scalars(query)
-        return query.one_or_none()
+        result = await self.session.execute(query)
+        return result.unique().scalars().one_or_none()
 
     async def _one(self, query: Select) -> ModelType:
         """
@@ -139,8 +139,8 @@ class BaseRepository(Generic[ModelType]):
         :param query: The query to execute.
         :return: The first model instance.
         """
-        query = await self.session.scalars(query)
-        return query.one()
+        result = await self.session.execute(query)
+        return result.unique().scalars().one()
 
     async def _count(self, query: Select) -> int:
         """

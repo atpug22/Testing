@@ -35,8 +35,8 @@ async def get_organizations(
 ) -> list[OrganizationResponse]:
     """Get all organizations for the current user"""
     organizations = await organization_controller.get_by_user(user.id)
-    # Convert SQLAlchemy models to Pydantic models (Pydantic v1 uses from_orm)
-    return [OrganizationResponse.from_orm(org) for org in organizations]
+    # Convert SQLAlchemy models to Pydantic models (Pydantic v2 uses model_validate)
+    return [OrganizationResponse.model_validate(org) for org in organizations]
 
 
 @organization_router.post("/", status_code=201)
@@ -80,8 +80,8 @@ async def create_organization(
             result = await db_session.execute(stmt)
             fresh_org = result.scalar_one()
             
-            # Use Pydantic's from_orm to convert SQLAlchemy model (Pydantic v1)
-            return OrganizationResponse.from_orm(fresh_org)
+            # Use Pydantic's model_validate to convert SQLAlchemy model (Pydantic v2)
+            return OrganizationResponse.model_validate(fresh_org)
         finally:
             await db_session.close()
 
@@ -104,7 +104,7 @@ async def get_organization(
     if user.id not in [member.id for member in organization.members]:
         raise HTTPException(status_code=403, detail="Not a member of this organization")
     
-    return OrganizationDetailResponse.from_orm(organization)
+    return OrganizationDetailResponse.model_validate(organization)
 
 
 @organization_router.patch("/{organization_id}", dependencies=[Depends(AuthenticationRequired)])
@@ -132,7 +132,7 @@ async def update_organization(
         organization.description = request.description
     
     updated_org = await organization_controller.update(id_=organization_id, obj=organization)
-    return OrganizationResponse.from_orm(updated_org)
+    return OrganizationResponse.model_validate(updated_org)
 
 
 @organization_router.delete("/{organization_id}", dependencies=[Depends(AuthenticationRequired)])
@@ -214,7 +214,7 @@ async def invite_member(
     return invitation
 
 
-@organization_router.get("/{organization_id}/invitations", dependencies=[Depends(AuthenticationRequired)])
+@organization_router.get("/{organization_id}/invitations", status_code=200)
 async def get_organization_invitations(
     organization_id: int,
     user: User = Depends(get_current_user),

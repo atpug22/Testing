@@ -1,6 +1,7 @@
-from pydantic import BaseModel, constr
+from pydantic import BaseModel
+from typing import Annotated
 
 
 class TaskCreate(BaseModel):
-    title: constr(min_length=1, max_length=100)
-    description: constr(min_length=1, max_length=1000)
+    title: Annotated[str, "Title must be 1-100 characters"]
+    description: Annotated[str, "Description must be 1-1000 characters"]

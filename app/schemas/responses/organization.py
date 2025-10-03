@@ -10,8 +10,7 @@ class OrganizationMemberResponse(BaseModel):
     email: str
     role: str
 
-    class Config:
-        orm_mode = True  # Pydantic v1 syntax
+    model_config = {"from_attributes": True}  # Pydantic v2 syntax
 
 
 class OrganizationResponse(BaseModel):
@@ -24,14 +23,12 @@ class OrganizationResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True  # Pydantic v1 syntax
+    model_config = {"from_attributes": True}  # Pydantic v2 syntax
 
 
 class OrganizationDetailResponse(OrganizationResponse):
     """Detailed response schema for organization with members"""
     members: list[OrganizationMemberResponse] = []
 
-    class Config:
-        orm_mode = True  # Pydantic v1 syntax
+    model_config = {"from_attributes": True}  # Pydantic v2 syntax
 
