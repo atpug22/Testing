@@ -10,8 +10,7 @@ class ResponseInfo(BaseModel):
     body: str = Field(default="", title="응답 바디")
     status_code: Optional[int] = Field(default=None, title="Status code")
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
 
 
 class ResponseLoggerMiddleware:

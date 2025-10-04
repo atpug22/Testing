@@ -38,10 +38,11 @@ class Config(BaseSettings):
     APP_BASE_URL: str = Field(default="http://localhost:8000", env="APP_BASE_URL")
     FRONTEND_URL: str = Field(default="http://localhost:3000", env="FRONTEND_URL")
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
-        extra = "ignore"  # Allow extra fields from .env
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+        "extra": "ignore"  # Allow extra fields from .env
+    }
 
 
 config: Config = Config()
