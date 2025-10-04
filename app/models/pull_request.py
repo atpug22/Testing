@@ -66,6 +66,16 @@ class PullRequest(Base, TimestampMixin):
     flow_blockers = Column(ARRAY(String), nullable=True)
     risk_flags = Column(ARRAY(String), nullable=True)
     
+    # Enhanced metadata fields for comprehensive PR analysis
+    pr_metadata = Column(JSON, nullable=True)  # Description, labels, comments metadata
+    cicd_metadata = Column(JSON, nullable=True)  # CI/CD checks and status
+    time_cycle_metadata = Column(JSON, nullable=True)  # Time cycle analysis
+    reviewers_metadata = Column(JSON, nullable=True)  # Code reviewers and review status
+    file_changes_metadata = Column(JSON, nullable=True)  # LOC changes per file
+    linked_issues_metadata = Column(JSON, nullable=True)  # Linked issues (GitHub, Jira, Linear)
+    git_blame_metadata = Column(JSON, nullable=True)  # Git blame information
+    repository_info = Column(JSON, nullable=True)  # Repository owner/name for public repos
+    
     # Author of the PR
     author_id = Column(
         BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False

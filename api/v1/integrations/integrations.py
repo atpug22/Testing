@@ -98,7 +98,7 @@ async def create_github_integration(
         "organization_id": organization_id,
         "access_token": request.access_token,
         "github_owner": github_owner,
-        "selected_repos": [],
+        "selected_repos": request.selected_repos,
         "is_active": True,
     })
     

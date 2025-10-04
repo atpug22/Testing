@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import AnalyticsTab from '../../components/AnalyticsTab';
 import Link from 'next/link';
 
 interface Repository {
@@ -19,6 +20,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [hasIntegration, setHasIntegration] = useState(false);
   const [currentOrgId, setCurrentOrgId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'repositories' | 'analytics'>('repositories');
 
   useEffect(() => {
     checkIntegration();
@@ -113,6 +115,34 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          {/* Tab Navigation */}
+          <div className="mb-6">
+            <div className="border-b border-gray-200">
+              <nav className="-mb-px flex space-x-8">
+                <button
+                  onClick={() => setActiveTab('repositories')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'repositories'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Repositories
+                </button>
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'analytics'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Analytics
+                </button>
+              </nav>
+            </div>
+          </div>
+
           {!hasIntegration ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
               <div className="flex items-start gap-3">
@@ -136,69 +166,77 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Repository Selector
-                </h2>
-                
-                {loading ? (
-                  <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <p className="mt-2 text-gray-600">Loading repositories...</p>
+            <>
+              {activeTab === 'repositories' && (
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                      Repository Selector
+                    </h2>
+                    
+                    {loading ? (
+                      <div className="text-center py-8">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <p className="mt-2 text-gray-600">Loading repositories...</p>
+                      </div>
+                    ) : availableRepos.length === 0 ? (
+                      <p className="text-gray-500">No repositories found.</p>
+                    ) : (
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {availableRepos.map((repo) => (
+                          <label
+                            key={repo.full_name}
+                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedRepos.includes(repo.name)}
+                              onChange={() => handleRepoToggle(repo.name)}
+                              className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-gray-900">{repo.full_name}</p>
+                                {repo.private && (
+                                  <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                                    Private
+                                  </span>
+                                )}
+                              </div>
+                              {repo.description && (
+                                <p className="text-sm text-gray-500 mt-1">{repo.description}</p>
+                              )}
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                ) : availableRepos.length === 0 ? (
-                  <p className="text-gray-500">No repositories found.</p>
-                ) : (
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {availableRepos.map((repo) => (
-                      <label
-                        key={repo.full_name}
-                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedRepos.includes(repo.name)}
-                          onChange={() => handleRepoToggle(repo.name)}
-                          className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-gray-900">{repo.full_name}</p>
-                            {repo.private && (
-                              <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
-                                Private
-                              </span>
-                            )}
-                          </div>
-                          {repo.description && (
-                            <p className="text-sm text-gray-500 mt-1">{repo.description}</p>
-                          )}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              {selectedRepos.length > 0 && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-blue-900 mb-2">
-                    Selected Repositories ({selectedRepos.length})
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedRepos.map((repo) => (
-                      <span
-                        key={repo}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                      >
-                        {repo}
-                      </span>
-                    ))}
-                  </div>
+                  {selectedRepos.length > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                      <h3 className="text-lg font-medium text-blue-900 mb-2">
+                        Selected Repositories ({selectedRepos.length})
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedRepos.map((repo) => (
+                          <span
+                            key={repo}
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                          >
+                            {repo}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+
+              {activeTab === 'analytics' && currentOrgId && (
+                <AnalyticsTab organizationId={currentOrgId} />
+              )}
+            </>
           )}
         </div>
       </DashboardLayout>

@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ProtectedRoute from '../../components/ProtectedRoute';
 
+interface Repository {
+  name: string;
+  full_name: string;
+  description: string | null;
+  private: boolean;
+  html_url: string;
+}
+
 export default function IntegrationsPage() {
   const [githubToken, setGithubToken] = useState('');
   const [githubOwner, setGithubOwner] = useState('');
@@ -12,6 +20,9 @@ export default function IntegrationsPage() {
   const [integration, setIntegration] = useState<any>(null);
   const [currentOrgId, setCurrentOrgId] = useState<number | null>(null);
   const [showTokenInput, setShowTokenInput] = useState(false);
+  const [availableRepos, setAvailableRepos] = useState<Repository[]>([]);
+  const [selectedRepos, setSelectedRepos] = useState<string[]>([]);
+  const [loadingRepos, setLoadingRepos] = useState(false);
 
   useEffect(() => {
     checkIntegration();
@@ -42,12 +53,33 @@ export default function IntegrationsPage() {
               setHasIntegration(true);
               setIntegration(data);
               setGithubOwner(data.github_owner || '');
+              setSelectedRepos(data.selected_repos || []);
+              fetchRepositories(orgId);
             }
           }
         }
       }
     } catch (error) {
       console.error('Failed to check integration:', error);
+    }
+  };
+
+  const fetchRepositories = async (orgId: number) => {
+    setLoadingRepos(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/v1'}/integrations/github/${orgId}/repositories`,
+        { credentials: 'include' }
+      );
+      
+      if (response.ok) {
+        const repos = await response.json();
+        setAvailableRepos(repos);
+      }
+    } catch (error) {
+      console.error('Failed to fetch repositories:', error);
+    } finally {
+      setLoadingRepos(false);
     }
   };
 
@@ -77,6 +109,7 @@ export default function IntegrationsPage() {
         body: JSON.stringify({
           access_token: githubToken,
           github_owner: githubOwner || null,
+          selected_repos: selectedRepos,
         }),
       });
 
@@ -93,6 +126,31 @@ export default function IntegrationsPage() {
     } finally {
       setLoading(false);
       setGithubToken('');
+    }
+  };
+
+  const handleRepoToggle = async (repoName: string) => {
+    const newSelected = selectedRepos.includes(repoName)
+      ? selectedRepos.filter(r => r !== repoName)
+      : [...selectedRepos, repoName];
+    
+    setSelectedRepos(newSelected);
+
+    // Update on backend
+    if (currentOrgId) {
+      try {
+        await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/v1'}/integrations/github/${currentOrgId}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ selected_repos: newSelected }),
+          }
+        );
+      } catch (error) {
+        console.error('Failed to update selected repos:', error);
+      }
     }
   };
 
@@ -168,6 +226,67 @@ export default function IntegrationsPage() {
                       <p className="text-sm text-green-600 mt-1">
                         Owner: {integration.github_owner}
                       </p>
+                    )}
+                  </div>
+
+                  {/* Repository Selection */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-gray-700">Select Repositories</h4>
+                    
+                    {loadingRepos ? (
+                      <div className="text-center py-4">
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <p className="mt-2 text-sm text-gray-600">Loading repositories...</p>
+                      </div>
+                    ) : availableRepos.length === 0 ? (
+                      <p className="text-sm text-gray-500">No repositories found.</p>
+                    ) : (
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {availableRepos.map((repo) => (
+                          <label
+                            key={repo.full_name}
+                            className="flex items-start gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedRepos.includes(repo.name)}
+                              onChange={() => handleRepoToggle(repo.name)}
+                              className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-gray-900 truncate">{repo.full_name}</p>
+                                {repo.private && (
+                                  <span className="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                                    Private
+                                  </span>
+                                )}
+                              </div>
+                              {repo.description && (
+                                <p className="text-xs text-gray-500 mt-1 line-clamp-2">{repo.description}</p>
+                              )}
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedRepos.length > 0 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-sm font-medium text-blue-900 mb-2">
+                          Selected ({selectedRepos.length})
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {selectedRepos.map((repo) => (
+                            <span
+                              key={repo}
+                              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium"
+                            >
+                              {repo}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
                   
