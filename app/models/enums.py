@@ -7,6 +7,7 @@ from enum import Enum
 
 class PrimaryStatus(str, Enum):
     """Primary status of an engineer (LogPose domain)"""
+
     BALANCED = "balanced"
     OVERLOADED = "overloaded"
     BLOCKED = "blocked"
@@ -17,6 +18,7 @@ class PrimaryStatus(str, Enum):
 
 class FlowBlocker(str, Enum):
     """Flow blockers for PRs as defined in LogPose domain."""
+
     AWAITING_REVIEW = "awaiting_review"
     REVIEW_STALEMATE = "review_stalemate"
     BROKEN_BUILD = "broken_build"
@@ -26,6 +28,7 @@ class FlowBlocker(str, Enum):
 
 class RiskFlag(str, Enum):
     """Risk flags for PRs as defined in LogPose domain."""
+
     CRITICAL_FILE_CHANGE = "critical_file_change"
     LARGE_BLAST_RADIUS = "large_blast_radius"
     SCOPE_CREEP_DETECTED = "scope_creep_detected"
@@ -36,6 +39,7 @@ class RiskFlag(str, Enum):
 
 class WorkFocusType(str, Enum):
     """Type of work focus"""
+
     FEATURE = "feature"
     BUG = "bug"
     CHORE = "chore"
@@ -44,6 +48,7 @@ class WorkFocusType(str, Enum):
 
 class EventType(str, Enum):
     """Types of events in the timeline"""
+
     PR_OPENED = "pr_opened"
     PR_MERGED = "pr_merged"
     PR_CLOSED = "pr_closed"
@@ -51,4 +56,3 @@ class EventType(str, Enum):
     REVIEW_SUBMITTED = "review_submitted"
     ISSUE_CLOSED = "issue_closed"
     COMMENT_ADDED = "comment_added"
-

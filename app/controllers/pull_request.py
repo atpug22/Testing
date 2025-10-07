@@ -31,4 +31,3 @@ class PullRequestController(BaseController[PullRequest]):
     ) -> list[PullRequest]:
         """Get all pull requests by status."""
         return await self.pull_request_repository.get_by_status(status, join_)
-

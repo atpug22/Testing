@@ -13,12 +13,12 @@ import { PRRiskTable } from './components/PRRiskTable';
 import { ExpandedPRView } from './components/ExpandedPRView';
 import { RiskDistributionChart, RiskGauge } from './components/RiskMetricsChart';
 import prRiskAPI from '../lib/pr-risk-api';
-import type { 
-  DashboardSummary, 
-  PRListItem, 
+import type {
+  DashboardSummary,
+  PRListItem,
   PRRiskAnalysisRequest,
   PRRiskAnalysis,
-  RiskLevel 
+  RiskLevel
 } from '../types/pr-risk';
 
 interface PRRiskDashboardProps {
@@ -54,8 +54,8 @@ export const PRRiskDashboard: React.FC<PRRiskDashboardProps> = ({ owner, repo })
     try {
       setError(null);
       const prData = await prRiskAPI.getRepositoryPRs(
-        owner, 
-        repo, 
+        owner,
+        repo,
         riskLevel === 'all' ? undefined : riskLevel as RiskLevel,
         100
       );
@@ -80,14 +80,14 @@ export const PRRiskDashboard: React.FC<PRRiskDashboardProps> = ({ owner, repo })
       };
 
       const response = await prRiskAPI.analyzeRepository(request);
-      
+
       if (!response.success) {
         throw new Error(response.error_message || 'Analysis failed');
       }
 
       // Reload data after analysis
       await Promise.all([loadSummary(), loadPRs()]);
-      
+
     } catch (err) {
       console.error('Error analyzing repository:', err);
       setError(err instanceof Error ? err.message : 'Analysis failed');
@@ -130,7 +130,7 @@ export const PRRiskDashboard: React.FC<PRRiskDashboardProps> = ({ owner, repo })
 
   const getRiskLevelCounts = () => {
     if (!summary) return { all: 0, low: 0, medium: 0, high: 0, critical: 0 };
-    
+
     return {
       all: summary.total_prs,
       low: summary.risk_distribution.low,
@@ -277,7 +277,7 @@ export const PRRiskDashboard: React.FC<PRRiskDashboardProps> = ({ owner, repo })
                 variant={selectedRiskLevel === level ? 'primary' : 'secondary'}
                 onClick={() => setSelectedRiskLevel(level)}
               >
-                {level === 'all' ? 'All' : level.charAt(0).toUpperCase() + level.slice(1)} 
+                {level === 'all' ? 'All' : level.charAt(0).toUpperCase() + level.slice(1)}
                 ({riskCounts[level]})
               </Button>
             ))}

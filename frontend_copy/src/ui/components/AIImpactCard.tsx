@@ -89,21 +89,21 @@ export const AIImpactCard: React.FC<AIImpactCardProps> = ({ analysis, className 
           </div>
           <div className="text-sm text-gray-600">AI Adoption</div>
         </div>
-        
+
         <div className="text-center p-3 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">
             {analysis.metrics.ai_authored_prs}
           </div>
           <div className="text-sm text-gray-600">AI PRs</div>
         </div>
-        
+
         <div className="text-center p-3 bg-green-50 rounded-lg">
           <div className="text-2xl font-bold text-green-600">
             {analysis.quality.quality_score.toFixed(0)}
           </div>
           <div className="text-sm text-gray-600">Quality Score</div>
         </div>
-        
+
         <div className="text-center p-3 bg-orange-50 rounded-lg">
           <div className="text-xl">
             {getTrendIcon(analysis.trends.trend_direction)}

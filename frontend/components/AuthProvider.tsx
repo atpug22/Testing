@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/v1'}/auth/me`, {
         credentials: 'include',
       });
-      
+
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);

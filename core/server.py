@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import Depends, FastAPI, Request
@@ -17,6 +18,10 @@ from core.fastapi.middlewares import (
     SQLAlchemyMiddleware,
 )
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def on_auth_error(request: Request, exc: Exception):
     status_code, error_code, message = 401, None, str(exc)
@@ -32,7 +37,16 @@ def on_auth_error(request: Request, exc: Exception):
 
 
 def init_routers(app_: FastAPI) -> None:
-    app_.include_router(router)
+    logger.info("Initializing routers...")
+    try:
+        app_.include_router(router)
+        logger.info("✅ Router included successfully")
+        logger.info(
+            f"Registered routes: {[route.path for route in app_.routes if hasattr(route, 'path')]}"
+        )
+    except Exception as e:
+        logger.error(f"❌ Failed to include router: {e}")
+        raise
 
 
 def init_listeners(app_: FastAPI) -> None:
@@ -69,19 +83,28 @@ def init_cache() -> None:
 
 
 def create_app() -> FastAPI:
-    app_ = FastAPI(
-        title="FastAPI Boilerplate",
-        description="FastAPI Boilerplate by @iam-abbas",
-        version="1.0.0",
-        docs_url=None if config.ENVIRONMENT == "production" else "/docs",
-        redoc_url=None if config.ENVIRONMENT == "production" else "/redoc",
-        dependencies=[Depends(Logging)],
-        middleware=make_middleware(),
-    )
-    init_routers(app_=app_)
-    init_listeners(app_=app_)
-    init_cache()
-    return app_
+    logger.info("🚀 Creating FastAPI application...")
+    try:
+        app_ = FastAPI(
+            title="FastAPI Boilerplate",
+            description="FastAPI Boilerplate by @iam-abbas",
+            version="1.0.0",
+            docs_url=None if config.ENVIRONMENT == "production" else "/docs",
+            redoc_url=None if config.ENVIRONMENT == "production" else "/redoc",
+            dependencies=[Depends(Logging)],
+            middleware=make_middleware(),
+        )
+        logger.info("✅ FastAPI app created")
+
+        init_routers(app_=app_)
+        init_listeners(app_=app_)
+        init_cache()
+
+        logger.info("🎉 Application initialization complete!")
+        return app_
+    except Exception as e:
+        logger.error(f"❌ Failed to create app: {e}")
+        raise
 
 
 app = create_app()

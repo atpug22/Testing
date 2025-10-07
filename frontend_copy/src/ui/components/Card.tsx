@@ -20,4 +20,4 @@ export function CardHeader({ title, actions }: { title: string; actions?: ReactN
 
 export function CardBody({ children, className }: { children: ReactNode; className?: string }) {
 	return <div className={clsx('p-4', className)}>{children}</div>
-} 
+}

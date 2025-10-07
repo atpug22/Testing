@@ -125,4 +125,3 @@ export default function TeamMemberPage({ params }: { params: Promise<{ id: strin
     </div>
   );
 }
-

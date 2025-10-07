@@ -31,4 +31,3 @@ class TeamController(BaseController[Team]):
     async def remove_member(self, team: Team, user: User) -> None:
         """Remove a user from a team."""
         await self.team_repository.remove_member(team, user)
-

@@ -8,4 +8,4 @@ export function EmptyState({ title, message, cta }: { title: string; message?: s
 			{cta && <div className="mt-4 inline-flex">{cta}</div>}
 		</div>
 	)
-} 
+}

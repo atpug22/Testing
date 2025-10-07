@@ -1,116 +1,84 @@
-# Build configuration
-# -------------------
+# FastAPI Boilerplate Makefile
 
-APP_NAME := `sed -n 's/^ *name.*=.*"\([^"]*\)".*/\1/p' pyproject.toml`
-APP_VERSION := `sed -n 's/^ *version.*=.*"\([^"]*\)".*/\1/p' pyproject.toml`
-GIT_REVISION = `git rev-parse HEAD`
+.PHONY: help format lint test clean install dev-setup
 
-# Introspection targets
-# ---------------------
+help: ## Show this help message
+	@echo "Available commands:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: help
-help: header targets
+format: ## Format code with Black and isort
+	@echo "🎨 Formatting code..."
+	python format_code.py
 
-.PHONY: header
-header:
-	@echo "\033[34mEnvironment\033[0m"
-	@echo "\033[34m---------------------------------------------------------------\033[0m"
-	@printf "\033[33m%-23s\033[0m" "APP_NAME"
-	@printf "\033[35m%s\033[0m" $(APP_NAME)
-	@echo ""
-	@printf "\033[33m%-23s\033[0m" "APP_VERSION"
-	@printf "\033[35m%s\033[0m" $(APP_VERSION)
-	@echo ""
-	@printf "\033[33m%-23s\033[0m" "GIT_REVISION"
-	@printf "\033[35m%s\033[0m" $(GIT_REVISION)
-	@echo "\n"
+lint: ## Run linting checks
+	@echo "🔍 Running linting checks..."
+	flake8 app/ api/ core/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+	mypy app/ api/ core/ --ignore-missing-imports
 
-.PHONY: targets
-targets:
-	@echo "\033[34mDevelopment Targets\033[0m"
-	@echo "\033[34m---------------------------------------------------------------\033[0m"
-	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
+test: ## Run tests
+	@echo "🧪 Running tests..."
+	pytest tests/ -v
 
-# Development targets
-# -------------
+test-ai: ## Run AI integration tests
+	@echo "🤖 Running AI integration tests..."
+	python test_enhanced_ai.py
 
-.PHONY: install
 install: ## Install dependencies
+	@echo "📦 Installing dependencies..."
 	poetry install
 
-.PHONY: run
-run: start
+dev-setup: ## Set up development environment
+	@echo "🛠️ Setting up development environment..."
+	poetry install
+	pre-commit install
+	@echo "✅ Development environment ready!"
 
-.PHONY: start
-start: ## Starts the server
-	$(eval include .env)
-	$(eval export $(sh sed 's/=.*//' .env))
+clean: ## Clean up temporary files
+	@echo "🧹 Cleaning up..."
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name "__pycache__" -delete
+	find . -type d -name "*.egg-info" -exec rm -rf {} +
+	find . -type f -name ".coverage" -delete
+	find . -type d -name ".pytest_cache" -exec rm -rf {} +
+	find . -type d -name ".mypy_cache" -exec rm -rf {} +
 
-	poetry run python main.py
-
-.PHONY: migrate
-migrate: ## Run the migrations
-	$(eval include .env)
-	$(eval export $(sh sed 's/=.*//' .env))
-
+migrate: ## Run database migrations
+	@echo "🗄️ Running database migrations..."
 	poetry run alembic upgrade head
 
-.PHONY: rollback
-rollback: ## Rollback migrations one level
-	$(eval include .env)
-	$(eval export $(sh sed 's/=.*//' .env))
-
-	poetry run alembic downgrade -1
-
-.PHONY: reset-database
-reset-database: ## Rollback all migrations
-	$(eval include .env)
-	$(eval export $(sh sed 's/=.*//' .env))
-
+reset-db: ## Reset database
+	@echo "🔄 Resetting database..."
 	poetry run alembic downgrade base
+	poetry run alembic upgrade head
 
-.PHONY: generate-migration 
-generate-migration: ## Generate a new migration
-	$(eval include .env) 
-	$(eval export $(sh sed 's/=.*//' .env)) 
+start: ## Start the development server
+	@echo "🚀 Starting development server..."
+	python main.py
 
-	@read -p "Enter migration message: " message; \
-	poetry run alembic revision --autogenerate -m "$$message"
+# AI-specific commands
+ai-test: ## Test AI endpoints
+	@echo "🤖 Testing AI endpoints..."
+	curl -s http://localhost:8000/v1/ai/health | jq .
+	curl -s http://localhost:8000/v1/ai/analytics | jq .
+	curl -s http://localhost:8000/v1/ai/usage-metrics | jq .
 
-.PHONY: celery-worker
-celery-worker: ## Start celery worker
-	$(eval include .env)
-	$(eval export $(sh sed 's/=.*//' .env))
+ai-docs: ## Open AI API documentation
+	@echo "📚 Opening AI API documentation..."
+	@echo "Visit: http://localhost:8000/docs"
 
-	poetry run celery -A worker worker -l info
+# Formatting shortcuts
+black: ## Run Black formatter
+	black app/ api/ core/ tests/ main.py format_code.py test_enhanced_ai.py
 
-# Check, lint and format targets
-# ------------------------------
+isort: ## Run isort import sorter
+	isort --profile=black --multi-line=3 app/ api/ core/ tests/ main.py format_code.py test_enhanced_ai.py
 
-.PHONY: check
-check: check-format lint
+check-format: ## Check if code is properly formatted
+	@echo "🔍 Checking code formatting..."
+	black --check app/ api/ core/ tests/ main.py format_code.py test_enhanced_ai.py
+	isort --check-only --profile=black app/ api/ core/ tests/ main.py format_code.py test_enhanced_ai.py
+	@echo "✅ Code formatting is correct!"
 
-.PHONY: check-format
-check-format: ## Dry-run code formatter
-	poetry run black ./ --check
-	poetry run isort ./ --profile black --check
-
-.PHONY: lint
-lint: ## Run linter
-	poetry run pylint ./api ./app ./core
- 
-.PHONY: format
-format: ## Run code formatter
-	poetry run black ./
-	poetry run isort ./ --profile black
-
-.PHONY: check-lockfile
-check-lockfile: ## Compares lock file with pyproject.toml
-	poetry lock --check
-
-.PHONY: test
-test: ## Run the test suite
-	$(eval include .env)
-	$(eval export $(sh sed 's/=.*//' .env))
-
-	poetry run pytest -vv -s --cache-clear ./
+pre-commit-all: ## Run pre-commit on all files
+	@echo "🔧 Running pre-commit on all files..."
+	pre-commit run --all-files

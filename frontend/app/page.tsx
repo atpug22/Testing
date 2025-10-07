@@ -32,7 +32,7 @@ export default function Home() {
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-      
+
       if (response.ok) {
         // Login successful, refresh the page to update auth state
         window.location.reload();
@@ -56,7 +56,7 @@ export default function Home() {
         credentials: 'include',
         body: JSON.stringify({ email, password, username, name }),
       });
-      
+
       if (response.ok) {
         // Registration successful, refresh the page to update auth state
         window.location.reload();
@@ -83,7 +83,7 @@ export default function Home() {
               Proactive Intelligence for Engineering Managers
             </p>
             <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-              Action over Alerts. Get real-time insights into your team's productivity, 
+              Action over Alerts. Get real-time insights into your team's productivity,
               identify bottlenecks, and make data-driven decisions.
             </p>
           </div>
@@ -103,7 +103,7 @@ export default function Home() {
                 <p className="text-gray-600 mb-8">
                   Choose how you'd like to sign in to LogPose
                 </p>
-                
+
                 <div className="space-y-4">
                   <button
                     onClick={() => setShowLoginForm(true)}
@@ -195,7 +195,7 @@ export default function Home() {
               onRepositorySelect={handleRepositorySelect}
               onFetchData={handleFetchData}
             />
-            
+
             <PublicRepoFetcher
               onDataFetched={handleFetchData}
             />

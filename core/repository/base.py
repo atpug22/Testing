@@ -46,7 +46,7 @@ class BaseRepository(Generic[ModelType]):
 
         if join_ is not None:
             return await self.all_unique(query)
-            
+
         return await self._all(query)
 
     async def get_by(
@@ -70,11 +70,37 @@ class BaseRepository(Generic[ModelType]):
         if unique:
             # For unique fields (like id), return a single object even with joins
             return await self._one(query)
-        
+
         if join_ is not None:
             return await self._all_unique(query)
 
         return await self._all(query)
+
+    async def update(
+        self, model_id: int, attributes: dict[str, Any] = None
+    ) -> ModelType:
+        """
+        Updates the model with the given attributes.
+
+        :param model_id: The id of the model to update.
+        :param attributes: The attributes to update.
+        :return: The updated model instance.
+        """
+        if attributes is None:
+            attributes = {}
+
+        # Get the existing model
+        model = await self.get_by_id(model_id)
+        if not model:
+            raise ValueError(f"Model with id {model_id} not found")
+
+        # Update attributes
+        for key, value in attributes.items():
+            if hasattr(model, key):
+                setattr(model, key, value)
+
+        self.session.add(model)
+        return model
 
     async def delete(self, model: ModelType) -> None:
         """

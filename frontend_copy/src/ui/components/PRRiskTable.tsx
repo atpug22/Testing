@@ -45,13 +45,13 @@ const formatTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
   const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-  
+
   if (diffInHours < 1) return 'Just now';
   if (diffInHours < 24) return `${diffInHours}h ago`;
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) return `${diffInDays}d ago`;
-  
+
   const diffInWeeks = Math.floor(diffInDays / 7);
   return `${diffInWeeks}w ago`;
 };
@@ -115,7 +115,7 @@ export const PRRiskTable: React.FC<PRRiskTableProps> = ({ prs, onPRClick }) => {
             {prs.map((pr) => (
               <React.Fragment key={pr.pr_number}>
                 {/* Main Row */}
-                <tr 
+                <tr
                   className={`hover:bg-gray-50 transition-colors cursor-pointer ${
                     isExpanded(pr.pr_number) ? 'bg-blue-50' : ''
                   }`}
@@ -158,7 +158,7 @@ export const PRRiskTable: React.FC<PRRiskTableProps> = ({ prs, onPRClick }) => {
                         {pr.delivery_risk_score.toFixed(1)}
                       </span>
                       <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full ${
                             pr.delivery_risk_score >= 80 ? 'bg-red-500' :
                             pr.delivery_risk_score >= 60 ? 'bg-orange-500' :
@@ -205,7 +205,7 @@ export const PRRiskTable: React.FC<PRRiskTableProps> = ({ prs, onPRClick }) => {
                     </div>
                   </td>
                 </tr>
-                
+
                 {/* Expanded Row */}
                 {isExpanded(pr.pr_number) && (
                   <tr className="bg-blue-50">
@@ -218,7 +218,7 @@ export const PRRiskTable: React.FC<PRRiskTableProps> = ({ prs, onPRClick }) => {
                             <p className="text-sm text-blue-800">{pr.ai_summary}</p>
                           </div>
                         )}
-                        
+
                         {/* Quick Stats */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           <div className="bg-white rounded-lg p-3 border border-gray-200 text-center">
@@ -238,7 +238,7 @@ export const PRRiskTable: React.FC<PRRiskTableProps> = ({ prs, onPRClick }) => {
                             <div className="text-xs text-gray-600">Risk Level</div>
                           </div>
                         </div>
-                        
+
                         {/* Additional Actions */}
                         <div className="flex space-x-2">
                           <button
@@ -273,4 +273,4 @@ export const PRRiskTable: React.FC<PRRiskTableProps> = ({ prs, onPRClick }) => {
   );
 };
 
-export default PRRiskTable; 
+export default PRRiskTable;

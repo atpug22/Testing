@@ -26,4 +26,4 @@ export function Alert({
 			{children}
 		</div>
 	)
-} 
+}

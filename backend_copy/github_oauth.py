@@ -66,7 +66,10 @@ async def fetch_github_user(access_token: str) -> dict:
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{GITHUB_API_BASE}/user",
-            headers={"Authorization": f"Bearer {access_token}", "Accept": "application/vnd.github+json"},
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Accept": "application/vnd.github+json",
+            },
             timeout=30.0,
         )
         resp.raise_for_status()
@@ -88,7 +91,9 @@ def get_session(session_id: Optional[str]) -> Optional[Dict[str, object]]:
     if not sess:
         return None
     created_at: datetime = sess.get("created_at")  # type: ignore
-    if created_at and created_at < datetime.now(timezone.utc) - timedelta(hours=SESSION_TTL_HOURS):
+    if created_at and created_at < datetime.now(timezone.utc) - timedelta(
+        hours=SESSION_TTL_HOURS
+    ):
         # Expire session
         SESSIONS.pop(session_id, None)
         return None
@@ -97,4 +102,4 @@ def get_session(session_id: Optional[str]) -> Optional[Dict[str, object]]:
 
 def clear_session(session_id: Optional[str]) -> None:
     if session_id and session_id in SESSIONS:
-        del SESSIONS[session_id] 
+        del SESSIONS[session_id]

@@ -7,12 +7,14 @@ from pydantic import BaseModel, EmailStr
 
 class EmailLoginRequest(BaseModel):
     """Email login request"""
+
     email: EmailStr
     password: str
 
 
 class EmailRegisterRequest(BaseModel):
     """Email registration request"""
+
     email: EmailStr
     password: str
     username: str
@@ -21,5 +23,6 @@ class EmailRegisterRequest(BaseModel):
 
 class GitHubConnectRequest(BaseModel):
     """GitHub connection request"""
+
     github_username: str
     github_token: str

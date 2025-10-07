@@ -62,4 +62,4 @@ export function RepoPicker({ repos, onPick }: { repos: Repo[]; onPick: (r: Repo,
 			<p className="text-xs text-slate-500">Analyze any <span className="font-medium">public</span> repo via owner/repo. For <span className="font-medium">private</span> repos, connect GitHub with access. Days controls the time range.</p>
 		</div>
 	)
-} 
+}

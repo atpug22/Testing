@@ -22,4 +22,3 @@ function KPITile({ title, value }: { title: string; value: number }) {
     </div>
   );
 }
-

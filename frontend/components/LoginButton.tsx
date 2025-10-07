@@ -19,10 +19,10 @@ export default function LoginButton() {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
           {user.avatar_url && (
-            <img 
-              src={user.avatar_url} 
+            <img
+              src={user.avatar_url}
               alt={user.login}
-              className="h-8 w-8 rounded-full ring-1 ring-gray-200" 
+              className="h-8 w-8 rounded-full ring-1 ring-gray-200"
             />
           )}
           <div>

@@ -42,4 +42,4 @@ export function ContributorView({ cm, onBack }: { cm: ContributorMetrics; onBack
 			</Card>
 		</div>
 	)
-} 
+}

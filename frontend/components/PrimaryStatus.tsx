@@ -22,4 +22,3 @@ export default function PrimaryStatus({ status }: { status: PrimaryStatusRespons
     </div>
   );
 }
-

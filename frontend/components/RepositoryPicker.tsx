@@ -41,7 +41,7 @@ export default function RepositoryPicker({ onRepositorySelect, onFetchData }: Re
               const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/v1'}/auth/repos`, {
         credentials: 'include',
       });
-      
+
       if (response.ok) {
         const repos = await response.json();
         setRepositories(repos);
@@ -62,10 +62,10 @@ export default function RepositoryPicker({ onRepositorySelect, onFetchData }: Re
 
   const handleFetchData = async () => {
     if (!selectedRepo) return;
-    
+
     setFetching(true);
     setError(null);
-    
+
     try {
               const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/v1'}/github/repos/fetch`, {
         method: 'POST',
@@ -79,7 +79,7 @@ export default function RepositoryPicker({ onRepositorySelect, onFetchData }: Re
           days: days,
         }),
       });
-      
+
       if (response.ok) {
         const result = await response.json();
         onFetchData(selectedRepo.owner.login, selectedRepo.name, days);
@@ -181,7 +181,7 @@ export default function RepositoryPicker({ onRepositorySelect, onFetchData }: Re
                 <option value={365}>1 year</option>
               </select>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <button
                 onClick={handleFetchData}
@@ -202,7 +202,7 @@ export default function RepositoryPicker({ onRepositorySelect, onFetchData }: Re
                   </>
                 )}
               </button>
-              
+
               <div className="text-sm text-gray-600">
                 This will fetch PRs, commits, and compute team metrics
               </div>

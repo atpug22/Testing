@@ -81,37 +81,37 @@ export interface PRDetailedInfo {
   // Basic info
   description?: string;
   body_text?: string;
-  
+
   // Files and changes
   files: FileChange[];
   total_additions: number;
   total_deletions: number;
   total_changes: number;
-  
+
   // CI/CD
   ci_checks: CICheckRun[];
   ci_status: string;
-  
+
   // Timeline
   timeline_metrics: PRTimelineMetrics;
-  
+
   // Comments and discussions
   comments: PRComment[];
   total_comments: number;
-  
+
   // Labels
   labels: PRLabel[];
-  
+
   // Linked issues
   linked_issues: LinkedIssue[];
-  
+
   // Reviews
   review_summary: PRReviewSummary;
-  
+
   // Commits
   commit_count: number;
   commits_authors: string[];
-  
+
   // Additional metadata
   mergeable?: boolean;
   mergeable_state?: string;

@@ -45,13 +45,13 @@ const formatTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
   const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-  
+
   if (diffInHours < 1) return 'Just now';
   if (diffInHours < 24) return `${diffInHours}h ago`;
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) return `${diffInDays}d ago`;
-  
+
   const diffInWeeks = Math.floor(diffInDays / 7);
   return `${diffInWeeks}w ago`;
 };
@@ -59,9 +59,9 @@ const formatTimeAgo = (dateString: string): string => {
 export const PRRiskCard: React.FC<PRRiskCardProps> = ({ pr, onClick }) => {
   const riskColorClass = getRiskLevelColor(pr.risk_level);
   const riskIcon = getRiskLevelIcon(pr.risk_level);
-  
+
   return (
-    <div 
+    <div
       className={`
         bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer
         ${onClick ? 'hover:bg-gray-50' : ''}
@@ -81,12 +81,12 @@ export const PRRiskCard: React.FC<PRRiskCardProps> = ({ pr, onClick }) => {
           <div>{formatTimeAgo(pr.updated_at)}</div>
         </div>
       </div>
-      
+
       {/* Title */}
       <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2">
         {pr.title}
       </h3>
-      
+
       {/* Author and State */}
       <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
         <div className="flex items-center space-x-2">
@@ -100,14 +100,14 @@ export const PRRiskCard: React.FC<PRRiskCardProps> = ({ pr, onClick }) => {
           </span>
         </div>
       </div>
-      
+
       {/* AI Summary */}
       {pr.ai_summary && (
         <div className="text-xs text-gray-600 bg-gray-50 rounded p-2 mt-2">
           {pr.ai_summary}
         </div>
       )}
-      
+
       {/* Risk Score Bar */}
       <div className="mt-3">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -115,7 +115,7 @@ export const PRRiskCard: React.FC<PRRiskCardProps> = ({ pr, onClick }) => {
           <span>{pr.delivery_risk_score.toFixed(1)}/100</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
+          <div
             className={`h-2 rounded-full ${
               pr.delivery_risk_score >= 80 ? 'bg-red-500' :
               pr.delivery_risk_score >= 60 ? 'bg-orange-500' :

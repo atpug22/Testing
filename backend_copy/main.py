@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-import logging
-import asyncio
+
 import httpx
 from dotenv import load_dotenv
-from fastapi import Body, Cookie, FastAPI, HTTPException, Query, Response, Header
+from fastapi import Body, Cookie, FastAPI, Header, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 
@@ -59,12 +60,16 @@ async def auth_login(response: Response) -> RedirectResponse:
     state = generate_state()
     # Store state in a non-HTTPOnly cookie for the simple flow. In production, use server-side store.
     response = RedirectResponse(url=build_oauth_login_url(state))
-    response.set_cookie("oauth_state", state, httponly=False, max_age=300, samesite="lax")
+    response.set_cookie(
+        "oauth_state", state, httponly=False, max_age=300, samesite="lax"
+    )
     return response
 
 
 @app.get("/auth/callback")
-async def auth_callback(code: str, state: str, oauth_state: Optional[str] = Cookie(None)) -> RedirectResponse:
+async def auth_callback(
+    code: str, state: str, oauth_state: Optional[str] = Cookie(None)
+) -> RedirectResponse:
     if not oauth_state or oauth_state != state:
         raise HTTPException(status_code=400, detail="Invalid OAuth state")
     try:
@@ -73,7 +78,13 @@ async def auth_callback(code: str, state: str, oauth_state: Optional[str] = Cook
         session_id = generate_session_id()
         set_session(session_id, access_token, gh_user)
         response = RedirectResponse(url=f"{FRONTEND_URL}/#session_id={session_id}")
-        response.set_cookie("session_id", session_id, httponly=True, samesite="lax", max_age=60 * 60 * 24)
+        response.set_cookie(
+            "session_id",
+            session_id,
+            httponly=True,
+            samesite="lax",
+            max_age=60 * 60 * 24,
+        )
         response.delete_cookie("oauth_state")
         return response
     except Exception as e:
@@ -87,16 +98,20 @@ async def logout(session_id: Optional[str] = Cookie(None)) -> Dict[str, str]:
     return resp
 
 
-async def _gh_get(session_id: Optional[str], url: str, params: Optional[Dict[str, Any]] = None) -> httpx.Response:
+async def _gh_get(
+    session_id: Optional[str], url: str, params: Optional[Dict[str, Any]] = None
+) -> httpx.Response:
     sess = get_session(session_id)
     if not sess:
         raise HTTPException(status_code=401, detail="Not authenticated")
     token: str = sess["access_token"]  # type: ignore
-    client = httpx.AsyncClient(headers={
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-    })
+    client = httpx.AsyncClient(
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+    )
     resp = await client.get(url, params=params, timeout=60.0)
     if resp.status_code == 401:
         raise HTTPException(status_code=401, detail="GitHub auth expired")
@@ -104,7 +119,9 @@ async def _gh_get(session_id: Optional[str], url: str, params: Optional[Dict[str
     return resp
 
 
-async def _gh_paginated(session_id: Optional[str], url: str, params: Optional[Dict[str, Any]] = None) -> List[dict]:
+async def _gh_paginated(
+    session_id: Optional[str], url: str, params: Optional[Dict[str, Any]] = None
+) -> List[dict]:
     items: List[dict] = []
     page = 1
     per_page = 100
@@ -125,7 +142,9 @@ async def _gh_paginated(session_id: Optional[str], url: str, params: Optional[Di
 
 
 @app.get("/api/me")
-async def api_me(session_id: Optional[str] = Cookie(None), x_session_id: Optional[str] = Header(None)) -> dict:
+async def api_me(
+    session_id: Optional[str] = Cookie(None), x_session_id: Optional[str] = Header(None)
+) -> dict:
     sid = x_session_id or session_id
     sess = get_session(sid)
     if not sess:
@@ -134,13 +153,18 @@ async def api_me(session_id: Optional[str] = Cookie(None), x_session_id: Optiona
 
 
 @app.get("/api/repos")
-async def api_repos(session_id: Optional[str] = Cookie(None), x_session_id: Optional[str] = Header(None)) -> List[dict]:
+async def api_repos(
+    session_id: Optional[str] = Cookie(None), x_session_id: Optional[str] = Header(None)
+) -> List[dict]:
     sid = x_session_id or session_id
     # List repositories the user has access to (affiliations owner, collaborator, organization_member)
     repos = await _gh_paginated(
         sid,
         f"{GITHUB_API_BASE}/user/repos",
-        params={"affiliation": "owner,collaborator,organization_member", "sort": "pushed"},
+        params={
+            "affiliation": "owner,collaborator,organization_member",
+            "sort": "pushed",
+        },
     )
     # Simplify payload
     slim = [
@@ -166,7 +190,9 @@ def _dataset_path(owner: str, repo: str) -> Path:
     return DATA_DIR / safe
 
 
-async def _fetch_repo_dataset(session_id: Optional[str], owner: str, repo: str, days: int = 90) -> RepoDataset:
+async def _fetch_repo_dataset(
+    session_id: Optional[str], owner: str, repo: str, days: int = 90
+) -> RepoDataset:
     since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
 
     # Fetch PRs (state=all) since; we will stop once created_at < since
@@ -174,10 +200,22 @@ async def _fetch_repo_dataset(session_id: Optional[str], owner: str, repo: str, 
     page = 1
     per_page = 100
     while True:
-        resp = await _gh_get(session_id, f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls", params={
-            "state": "all", "sort": "created", "direction": "desc", "per_page": per_page, "page": page
-        })
-        chunk: List[dict] = resp.json() if resp.headers.get('content-type','').startswith('application/json') else []
+        resp = await _gh_get(
+            session_id,
+            f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls",
+            params={
+                "state": "all",
+                "sort": "created",
+                "direction": "desc",
+                "per_page": per_page,
+                "page": page,
+            },
+        )
+        chunk: List[dict] = (
+            resp.json()
+            if resp.headers.get("content-type", "").startswith("application/json")
+            else []
+        )
         if not chunk:
             break
         prs.extend(chunk)
@@ -201,20 +239,34 @@ async def _fetch_repo_dataset(session_id: Optional[str], owner: str, repo: str, 
     async def build_pr(pr: Dict[str, Any]) -> Dict[str, Any]:
         number = pr.get("number")
         async with sem:
-            reviews_task = _gh_paginated(session_id, f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls/{number}/reviews", params={})
-            commits_task = _gh_paginated(session_id, f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls/{number}/commits", params={})
+            reviews_task = _gh_paginated(
+                session_id,
+                f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls/{number}/reviews",
+                params={},
+            )
+            commits_task = _gh_paginated(
+                session_id,
+                f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls/{number}/commits",
+                params={},
+            )
             reviews, commits = await asyncio.gather(reviews_task, commits_task)
 
         first_review_at: Optional[str] = None
         if reviews:
             try:
-                first_review_at = min(r.get("submitted_at") for r in reviews if r.get("submitted_at"))
+                first_review_at = min(
+                    r.get("submitted_at") for r in reviews if r.get("submitted_at")
+                )
             except ValueError:
                 first_review_at = None
 
         first_commit_at: Optional[str] = None
         if commits:
-            dates = [c.get("commit", {}).get("author", {}).get("date") for c in commits if c.get("commit")]
+            dates = [
+                c.get("commit", {}).get("author", {}).get("date")
+                for c in commits
+                if c.get("commit")
+            ]
             dates = [d for d in dates if d]
             if dates:
                 first_commit_at = min(dates)
@@ -241,9 +293,15 @@ async def _fetch_repo_dataset(session_id: Optional[str], owner: str, repo: str, 
             "first_commit_at": first_commit_at,
         }
 
-    result_prs: List[Dict[str, Any]] = await asyncio.gather(*(build_pr(pr) for pr in filtered_prs))
+    result_prs: List[Dict[str, Any]] = await asyncio.gather(
+        *(build_pr(pr) for pr in filtered_prs)
+    )
 
-    commits = await _gh_paginated(session_id, f"{GITHUB_API_BASE}/repos/{owner}/{repo}/commits", params={"since": since})
+    commits = await _gh_paginated(
+        session_id,
+        f"{GITHUB_API_BASE}/repos/{owner}/{repo}/commits",
+        params={"since": since},
+    )
     result_commits: List[Dict[str, Any]] = []
     for c in commits:
         author = c.get("author")
@@ -251,26 +309,32 @@ async def _fetch_repo_dataset(session_id: Optional[str], owner: str, repo: str, 
         date = commit_info.get("author", {}).get("date")
         if not date:
             continue
-        result_commits.append({
-            "sha": c.get("sha"),
-            "author": {
-                "login": author.get("login") if author else None,
-                "id": author.get("id") if author else None,
-                "avatar_url": author.get("avatar_url") if author else None,
-                "html_url": author.get("html_url") if author else None,
-            } if author else None,
-            "commit_author_name": commit_info.get("author", {}).get("name"),
-            "commit_author_email": commit_info.get("author", {}).get("email"),
-            "date": date,
-        })
+        result_commits.append(
+            {
+                "sha": c.get("sha"),
+                "author": {
+                    "login": author.get("login") if author else None,
+                    "id": author.get("id") if author else None,
+                    "avatar_url": author.get("avatar_url") if author else None,
+                    "html_url": author.get("html_url") if author else None,
+                }
+                if author
+                else None,
+                "commit_author_name": commit_info.get("author", {}).get("name"),
+                "commit_author_email": commit_info.get("author", {}).get("email"),
+                "date": date,
+            }
+        )
 
-    dataset = RepoDataset.model_validate({
-        "repo": repo,
-        "owner": owner,
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
-        "prs": result_prs,
-        "commits": result_commits,
-    })
+    dataset = RepoDataset.model_validate(
+        {
+            "repo": repo,
+            "owner": owner,
+            "fetched_at": datetime.now(timezone.utc).isoformat(),
+            "prs": result_prs,
+            "commits": result_commits,
+        }
+    )
     return dataset
 
 
@@ -321,4 +385,4 @@ async def api_metrics(
         dataset = RepoDataset.model_validate(raw)
 
     metrics = compute_metrics(dataset)
-    return MetricsResponse(dataset=dataset, metrics=metrics) 
+    return MetricsResponse(dataset=dataset, metrics=metrics)

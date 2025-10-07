@@ -10,4 +10,4 @@ export function Section({ title, description, children }: { title: string; descr
 			{children}
 		</section>
 	)
-} 
+}

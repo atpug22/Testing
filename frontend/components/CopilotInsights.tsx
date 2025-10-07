@@ -38,4 +38,3 @@ export default function CopilotInsights({ insights }: { insights: CopilotInsight
     </div>
   );
 }
-

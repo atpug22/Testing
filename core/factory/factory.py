@@ -15,8 +15,8 @@ from app.repositories import (
     EventRepository,
     PullRequestRepository,
     TaskRepository,
-    TeamRepository,
     TeamMemberRepository,
+    TeamRepository,
     UserRepository,
 )
 from core.database import get_session

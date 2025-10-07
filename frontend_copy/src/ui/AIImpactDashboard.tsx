@@ -23,7 +23,7 @@ export const AIImpactDashboard: React.FC<AIImpactDashboardProps> = ({ owner, rep
     try {
       setLoading(true);
       setError(null);
-      
+
       const response: AIImpactResponse = await AIImpactAPI.analyzeAIImpact({
         owner,
         repo,

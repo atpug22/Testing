@@ -99,4 +99,3 @@ class PullRequestRepository(BaseRepository[PullRequest]):
         :return: Query.
         """
         return query.options(joinedload(PullRequest.team))
-

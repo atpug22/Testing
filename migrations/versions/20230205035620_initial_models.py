@@ -1,7 +1,7 @@
 """initial models
 
 Revision ID: cabcbd0d8153
-Revises: 
+Revises:
 Create Date: 2023-02-05 03:56:20.201748
 
 """

@@ -9,30 +9,30 @@ from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User, TeamMember, Team, PullRequest, Event
-from app.models.role import Role
+from app.models import Event, PullRequest, Team, TeamMember, User
 from app.models.enums import PrimaryStatus
-from core.database import standalone_session, session
+from app.models.role import Role
+from core.database import session, standalone_session
 from core.security.password import PasswordHandler
 
 
 @standalone_session
 async def seed_data():
     """Seed demo data for Team Member Page"""
-    
+
     async with session.begin():
         print("🌱 Starting data seeding...")
-        
+
         # Create Team
         print("Creating team...")
         team = Team(
             uuid=uuid4(),
             name="Engineering Team Alpha",
-            description="Main product engineering team"
+            description="Main product engineering team",
         )
         session.add(team)
         await session.flush()
-        
+
         # Create Users
         print("Creating users...")
         manager = User(
@@ -44,7 +44,7 @@ async def seed_data():
             is_admin=False,
         )
         session.add(manager)
-        
+
         teammate1 = User(
             uuid=uuid4(),
             username="bob_engineer",
@@ -55,7 +55,7 @@ async def seed_data():
             manager=manager,
         )
         session.add(teammate1)
-        
+
         teammate2 = User(
             uuid=uuid4(),
             username="carol_engineer",
@@ -66,20 +66,20 @@ async def seed_data():
             manager=manager,
         )
         session.add(teammate2)
-        
+
         # Flush to get IDs assigned
         await session.flush()
-        
+
         # Assign team manager
         team.manager_id = manager.id
-        
+
         # Flush again to ensure team has ID
         await session.flush()
-        
+
         # Note: Skipping team members association for now due to lazy='raise' constraint
         # This can be added via raw SQL after commit or by adjusting relationship lazy settings
         print("Note: Team membership will be added manually or via admin panel")
-        
+
         # Create TeamMember profiles
         print("Creating team member profiles...")
         manager_profile = TeamMember(
@@ -98,19 +98,15 @@ async def seed_data():
             collaboration_reach=7,
             github_username="alice_dev",
             github_avatar_url="https://avatars.githubusercontent.com/u/1",
-            work_focus_distribution={
-                "feature": 55.0,
-                "bug": 30.0,
-                "chore": 15.0
-            },
+            work_focus_distribution={"feature": 55.0, "bug": 30.0, "chore": 15.0},
             codebase_familiarity_percentage=67.5,
             top_collaborators=[
                 {"user_id": teammate1.id, "name": "Bob", "count": 12},
-                {"user_id": teammate2.id, "name": "Carol", "count": 8}
-            ]
+                {"user_id": teammate2.id, "name": "Carol", "count": 8},
+            ],
         )
         session.add(manager_profile)
-        
+
         bob_profile = TeamMember(
             uuid=uuid4(),
             user_id=teammate1.id,
@@ -127,15 +123,11 @@ async def seed_data():
             collaboration_reach=4,
             github_username="bob_codes",
             github_avatar_url="https://avatars.githubusercontent.com/u/2",
-            work_focus_distribution={
-                "feature": 70.0,
-                "bug": 20.0,
-                "chore": 10.0
-            },
+            work_focus_distribution={"feature": 70.0, "bug": 20.0, "chore": 10.0},
             codebase_familiarity_percentage=45.2,
         )
         session.add(bob_profile)
-        
+
         carol_profile = TeamMember(
             uuid=uuid4(),
             user_id=teammate2.id,
@@ -152,21 +144,17 @@ async def seed_data():
             collaboration_reach=6,
             github_username="carol_dev",
             github_avatar_url="https://avatars.githubusercontent.com/u/3",
-            work_focus_distribution={
-                "feature": 25.0,
-                "bug": 65.0,
-                "chore": 10.0
-            },
+            work_focus_distribution={"feature": 25.0, "bug": 65.0, "chore": 10.0},
             codebase_familiarity_percentage=82.3,
         )
         session.add(carol_profile)
-        
+
         await session.flush()
-        
+
         # Create PRs
         print("Creating pull requests...")
         now = datetime.utcnow()
-        
+
         prs_data = [
             # Bob's PRs (6 WIP to match overloaded status)
             {
@@ -213,7 +201,6 @@ async def seed_data():
                 "merged_at": now - timedelta(days=4),
                 "lines_changed": 150,
             },
-            
             # Carol's PRs (bug-heavy to match firefighting status)
             {
                 "author": teammate2,
@@ -248,7 +235,6 @@ async def seed_data():
                 "merged_at": now - timedelta(days=2),
                 "lines_changed": 85,
             },
-            
             # Manager's PRs
             {
                 "author": manager,
@@ -273,7 +259,7 @@ async def seed_data():
                 "lines_changed": 90,
             },
         ]
-        
+
         pr_objects = []
         for pr_data in prs_data:
             pr = PullRequest(
@@ -298,9 +284,9 @@ async def seed_data():
             )
             session.add(pr)
             pr_objects.append(pr)
-        
+
         await session.flush()
-        
+
         # Create timeline events
         print("Creating timeline events...")
         events_data = [
@@ -331,7 +317,6 @@ async def seed_data():
                 "title": "Reviewed PR #119: Add user roles",
                 "timestamp": now - timedelta(days=1, hours=6),
             },
-            
             # Carol's events
             {
                 "member": carol_profile,
@@ -346,7 +331,7 @@ async def seed_data():
                 "title": "Merged PR #100004: Payment gateway fix",
                 "timestamp": now - timedelta(hours=8),
                 "pr_id": pr_objects[4].id,
-                "event_metadata": {"blast_radius": "high"}
+                "event_metadata": {"blast_radius": "high"},
             },
             {
                 "member": carol_profile,
@@ -361,7 +346,7 @@ async def seed_data():
                 "timestamp": now - timedelta(hours=4),
             },
         ]
-        
+
         for event_data in events_data:
             event = Event(
                 uuid=uuid4(),
@@ -371,15 +356,17 @@ async def seed_data():
                 title=event_data["title"],
                 description=event_data.get("description"),
                 pr_id=event_data.get("pr_id"),
-                event_metadata=event_data.get("event_metadata", {})
+                event_metadata=event_data.get("event_metadata", {}),
             )
             session.add(event)
-        
+
         # Data will be committed when session.begin() context exits
         print("✅ Seed data created successfully!")
         print("\n📊 Summary:")
         print(f"   - Team: {team.name}")
-        print(f"   - Users: {manager.username} (manager), {teammate1.username}, {teammate2.username}")
+        print(
+            f"   - Users: {manager.username} (manager), {teammate1.username}, {teammate2.username}"
+        )
         print(f"   - PRs: {len(pr_objects)}")
         print(f"   - Events: {len(events_data)}")
         print("\n🔐 Login credentials:")
@@ -390,4 +377,3 @@ async def seed_data():
 
 if __name__ == "__main__":
     asyncio.run(seed_data())
-

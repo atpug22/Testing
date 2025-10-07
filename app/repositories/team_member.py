@@ -57,7 +57,7 @@ class TeamMemberRepository(BaseRepository[TeamMember]):
         """
         query = self._query(join_)
         # Could add filter for last_active_at if needed
-        
+
         if join_ is not None:
             return await self._all_unique(query)
 
@@ -72,4 +72,3 @@ class TeamMemberRepository(BaseRepository[TeamMember]):
         return query.options(joinedload(TeamMember.events)).execution_options(
             contains_joined_collection=True
         )
-

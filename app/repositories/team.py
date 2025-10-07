@@ -119,4 +119,3 @@ class TeamRepository(BaseRepository[Team]):
         return query.options(joinedload(Team.pull_requests)).execution_options(
             contains_joined_collection=True
         )
-

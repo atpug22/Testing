@@ -2,25 +2,26 @@
 GitHub OAuth Authentication Endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Query, Cookie, Response
-from fastapi.responses import RedirectResponse
 from typing import Optional
 
+from fastapi import APIRouter, Cookie, HTTPException, Query, Response
+from fastapi.responses import RedirectResponse
+
 from app.integrations.github_oauth import (
-    generate_state,
-    build_oauth_login_url,
-    exchange_code_for_token,
-    fetch_github_user,
-    fetch_github_repos,
-    set_session,
-    get_user_from_session,
-    get_access_token_from_session,
-    clear_session,
-    generate_session_id,
     FRONTEND_URL,
+    build_oauth_login_url,
+    clear_session,
+    exchange_code_for_token,
+    fetch_github_repos,
+    fetch_github_user,
+    generate_session_id,
+    generate_state,
+    get_access_token_from_session,
+    get_user_from_session,
+    set_session,
 )
-from app.repositories import UserRepository
 from app.models import User
+from app.repositories import UserRepository
 from core.database import get_session
 
 router = APIRouter()
@@ -38,26 +39,23 @@ async def github_login():
 
 
 @router.get("/callback")
-async def github_callback(
-    code: str = Query(...),
-    state: str = Query(...)
-):
+async def github_callback(code: str = Query(...), state: str = Query(...)):
     """Handle GitHub OAuth callback"""
     try:
         # Exchange code for token
         access_token = await exchange_code_for_token(code)
-        
+
         # Fetch user data
         github_user = await fetch_github_user(access_token)
-        
+
         # Get or create user in database
         db_session = next(get_session())
         try:
             user_repo = UserRepository(User, db_session)
-            
+
             # Try to find existing user by GitHub ID
             user = await user_repo.get_by("github_id", github_user["id"])
-            
+
             if not user:
                 # Try to find by username
                 user = await user_repo.get_by("username", github_user["login"])
@@ -70,7 +68,9 @@ async def github_callback(
                     # Create new user
                     user = User(
                         username=github_user["login"],
-                        email=github_user.get("email", f"{github_user['login']}@github.local"),
+                        email=github_user.get(
+                            "email", f"{github_user['login']}@github.local"
+                        ),
                         password="",  # OAuth users don't need password
                         github_id=github_user["id"],
                         github_avatar_url=github_user["avatar_url"],
@@ -83,13 +83,14 @@ async def github_callback(
                 # Update access token
                 user.github_access_token = access_token
                 await db_session.commit()
-            
+
             # Create session
             session_id = generate_session_id()
             set_session(session_id, access_token, github_user)
-            
+
             # Set session cookie and redirect
             from core.config import config
+
             response = RedirectResponse(url=config.FRONTEND_URL)
             response.set_cookie(
                 key="session_id",
@@ -97,14 +98,14 @@ async def github_callback(
                 httponly=True,
                 secure=False,  # Set to True in production with HTTPS
                 samesite="lax",
-                max_age=86400  # 24 hours
+                max_age=86400,  # 24 hours
             )
-            
+
             return response
-            
+
         finally:
             await db_session.close()
-            
+
     except Exception as e:
         print(f"OAuth callback error: {e}")  # Debug logging
         raise HTTPException(status_code=400, detail=f"OAuth error: {str(e)}")
@@ -116,7 +117,7 @@ async def get_current_user(session_id: Optional[str] = Cookie(None)):
     user_data = get_user_from_session(session_id)
     if not user_data:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    
+
     return {
         "id": user_data["id"],
         "login": user_data["login"],
@@ -132,7 +133,7 @@ async def get_user_repos(session_id: Optional[str] = Cookie(None)):
     access_token = get_access_token_from_session(session_id)
     if not access_token:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    
+
     try:
         repos = await fetch_github_repos(access_token)
         return [
@@ -155,14 +156,16 @@ async def get_user_repos(session_id: Optional[str] = Cookie(None)):
             for repo in repos
         ]
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to fetch repositories: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Failed to fetch repositories: {str(e)}"
+        )
 
 
 @router.post("/logout")
 async def logout(session_id: Optional[str] = Cookie(None), response: Response = None):
     """Logout user"""
     clear_session(session_id)
-    
+
     response = Response()
     response.delete_cookie(key="session_id")
     return {"message": "Logged out successfully"}

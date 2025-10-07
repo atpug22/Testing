@@ -8,4 +8,4 @@ export function Loader({ label = 'Loading…' }: { label?: string }) {
 			<span>{label}</span>
 		</div>
 	)
-} 
+}

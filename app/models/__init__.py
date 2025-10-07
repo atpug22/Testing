@@ -1,8 +1,8 @@
 from core.database import Base
 
-from .enums import PrimaryStatus, FlowBlocker, RiskFlag, WorkFocusType
+from .enums import FlowBlocker, PrimaryStatus, RiskFlag, WorkFocusType
 from .event import Event, EventType
-from .pull_request import PullRequest, PRPermission, PRStatus
+from .pull_request import PRPermission, PRStatus, PullRequest
 from .role import Role
 from .task import Task
 from .team import Team, TeamPermission

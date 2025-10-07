@@ -19,7 +19,7 @@ export default function PublicRepoFetcher({ onDataFetched }: PublicRepoFetcherPr
       setError('Please enter both owner and repository name');
       return;
     }
-    
+
     if (!githubToken) {
       setError('Please enter your GitHub token to analyze public repositories');
       return;
@@ -46,7 +46,7 @@ export default function PublicRepoFetcher({ onDataFetched }: PublicRepoFetcherPr
         const result = await response.json();
         onDataFetched(owner, repo);
         alert(`Successfully fetched ${result.total_prs} PRs from ${owner}/${repo}`);
-        
+
         // Redirect to the first team member page after successful data fetch
         // We'll redirect to a team member that was created from the GitHub data
         // For now, let's redirect to a hardcoded member ID, but ideally we'd get this from the API response
@@ -69,7 +69,7 @@ export default function PublicRepoFetcher({ onDataFetched }: PublicRepoFetcherPr
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         Fetch Public Repository Data
       </h3>
-      
+
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -84,7 +84,7 @@ export default function PublicRepoFetcher({ onDataFetched }: PublicRepoFetcherPr
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Repository Name

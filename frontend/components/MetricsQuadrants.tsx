@@ -7,7 +7,7 @@ export default function MetricsQuadrants({ metrics }: { metrics: MetricsResponse
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-gray-900">Performance Metrics</h2>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Velocity Quadrant */}
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
@@ -90,7 +90,7 @@ export default function MetricsQuadrants({ metrics }: { metrics: MetricsResponse
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Review Velocity</span>
               <span className="font-bold text-gray-900">
-                {metrics.collaboration.review_velocity_median_hours ? 
+                {metrics.collaboration.review_velocity_median_hours ?
                   `${metrics.collaboration.review_velocity_median_hours.toFixed(1)}h` : 'N/A'}
               </span>
             </div>
@@ -119,4 +119,3 @@ export default function MetricsQuadrants({ metrics }: { metrics: MetricsResponse
     </div>
   );
 }
-

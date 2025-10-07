@@ -1,7 +1,9 @@
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Boolean, Column, Enum as SQLEnum, ForeignKey, Unicode
+from sqlalchemy import BigInteger, Boolean, Column
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Unicode
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -27,12 +29,12 @@ class User(Base, TimestampMixin):
     password = Column(Unicode(255), nullable=False)
     username = Column(Unicode(255), nullable=False, unique=True)
     is_admin = Column(Boolean, default=False)
-    
+
     # GitHub integration fields
     github_id = Column(BigInteger, nullable=True, unique=True)
     github_avatar_url = Column(Unicode(500), nullable=True)
     github_access_token = Column(Unicode(500), nullable=True)  # Encrypted in production
-    
+
     # Role for hierarchical access control
     role = Column(
         SQLEnum(Role, native_enum=False, length=50),
@@ -78,7 +80,7 @@ class User(Base, TimestampMixin):
     tasks = relationship(
         "Task", back_populates="author", lazy="raise", passive_deletes=True
     )
-    
+
     # Pull requests created by this user
     pull_requests = relationship(
         "PullRequest",
@@ -87,7 +89,7 @@ class User(Base, TimestampMixin):
         passive_deletes=True,
         foreign_keys="PullRequest.author_id",
     )
-    
+
     # Pull requests assigned for review
     assigned_reviews = relationship(
         "PullRequest",
@@ -95,7 +97,7 @@ class User(Base, TimestampMixin):
         back_populates="reviewers",
         lazy="raise",
     )
-    
+
     # LogPose-specific profile (one-to-one)
     team_member_profile = relationship(
         "TeamMember",

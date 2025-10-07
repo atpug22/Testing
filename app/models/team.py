@@ -7,7 +7,12 @@ from sqlalchemy.orm import relationship
 
 from core.database import Base
 from core.database.mixins import TimestampMixin
-from core.security.access_control import Allow, Authenticated, RolePrincipal, UserPrincipal
+from core.security.access_control import (
+    Allow,
+    Authenticated,
+    RolePrincipal,
+    UserPrincipal,
+)
 
 
 class TeamPermission(Enum):
@@ -22,8 +27,18 @@ class TeamPermission(Enum):
 user_teams = Table(
     "user_teams",
     Base.metadata,
-    Column("user_id", BigInteger, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
-    Column("team_id", BigInteger, ForeignKey("teams.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "user_id",
+        BigInteger,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "team_id",
+        BigInteger,
+        ForeignKey("teams.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
 
 
@@ -86,4 +101,3 @@ class Team(Base, TimestampMixin):
             acl.append((Allow, UserPrincipal(self.manager_id), manager_permissions))
 
         return acl
-

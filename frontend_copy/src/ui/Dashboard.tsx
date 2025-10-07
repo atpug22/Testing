@@ -69,4 +69,4 @@ export function Dashboard({ data, onPickContributor }: { data: MetricsResponse; 
 			</Section>
 		</div>
 	)
-} 
+}

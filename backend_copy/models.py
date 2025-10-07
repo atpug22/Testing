@@ -96,4 +96,4 @@ class FetchRequest(BaseModel):
 
 class MetricsResponse(BaseModel):
     dataset: RepoDataset
-    metrics: Metrics 
+    metrics: Metrics

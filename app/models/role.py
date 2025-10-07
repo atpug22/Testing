@@ -33,4 +33,3 @@ class Role(str, Enum):
     def can_manage_specific_teams(self) -> bool:
         """Check if this role can manage specific assigned teams."""
         return self in [Role.CTO, Role.ENGINEERING_HEAD, Role.ENGINEERING_MANAGER]
-

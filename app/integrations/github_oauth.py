@@ -9,8 +9,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Tuple
 
 import httpx
-from fastapi import HTTPException
 from dotenv import load_dotenv
+from fastapi import HTTPException
 
 # Load environment variables from .env file
 load_dotenv()
@@ -45,8 +45,10 @@ def generate_session_id() -> str:
 def build_oauth_login_url(state: str) -> str:
     """Build GitHub OAuth login URL"""
     if not GITHUB_CLIENT_ID:
-        raise ValueError("GitHub OAuth not configured. Please set GITHUB_CLIENT_ID environment variable.")
-    
+        raise ValueError(
+            "GitHub OAuth not configured. Please set GITHUB_CLIENT_ID environment variable."
+        )
+
     scope = "repo read:org read:user user:email"
     redirect_uri = f"{APP_BASE_URL}/v1/auth/github/callback"
     return (
@@ -84,7 +86,7 @@ async def fetch_github_user(access_token: str) -> dict:
             f"{GITHUB_API_BASE}/user",
             headers={
                 "Authorization": f"Bearer {access_token}",
-                "Accept": "application/vnd.github+json"
+                "Accept": "application/vnd.github+json",
             },
             timeout=30.0,
         )
@@ -99,7 +101,7 @@ async def fetch_github_repos(access_token: str) -> list:
             f"{GITHUB_API_BASE}/user/repos",
             headers={
                 "Authorization": f"Bearer {access_token}",
-                "Accept": "application/vnd.github+json"
+                "Accept": "application/vnd.github+json",
             },
             params={"sort": "updated", "per_page": 100},
             timeout=30.0,
@@ -125,7 +127,9 @@ def get_session(session_id: Optional[str]) -> Optional[Dict[str, object]]:
     if not sess:
         return None
     created_at: datetime = sess.get("created_at")  # type: ignore
-    if created_at and created_at < datetime.now(timezone.utc) - timedelta(hours=SESSION_TTL_HOURS):
+    if created_at and created_at < datetime.now(timezone.utc) - timedelta(
+        hours=SESSION_TTL_HOURS
+    ):
         # Expire session
         SESSIONS.pop(session_id, None)
         return None

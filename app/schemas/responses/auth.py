@@ -3,11 +3,13 @@ Authentication response schemas
 """
 
 from typing import Optional
+
 from pydantic import BaseModel
 
 
 class AuthResponse(BaseModel):
     """Authentication response"""
+
     success: bool
     message: str
     user: Optional[dict] = None
@@ -16,6 +18,7 @@ class AuthResponse(BaseModel):
 
 class UserResponse(BaseModel):
     """User response"""
+
     id: int
     username: str
     email: str

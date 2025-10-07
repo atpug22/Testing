@@ -19,4 +19,4 @@ export function ContributorCard({ cm, onClick }: { cm: ContributorMetrics; onCli
 			</div>
 		</button>
 	)
-} 
+}

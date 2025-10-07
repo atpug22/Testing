@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 # === User/Author schemas ===
 class UserBrief(BaseModel):
     """Brief user information"""
+
     id: int
     username: str
     email: Optional[str] = None
@@ -19,6 +20,7 @@ class UserBrief(BaseModel):
 # === KPI Tile Schemas ===
 class KPITile(BaseModel):
     """KPI tile with hover details"""
+
     label: str
     value: int
     trend: Optional[str] = None  # "up", "down", "stable"
@@ -27,6 +29,7 @@ class KPITile(BaseModel):
 
 class KPITilesResponse(BaseModel):
     """All KPI tiles for the dashboard"""
+
     wip: KPITile
     reviews: KPITile
     in_discussion: KPITile
@@ -36,6 +39,7 @@ class KPITilesResponse(BaseModel):
 # === Primary Status ===
 class PrimaryStatusResponse(BaseModel):
     """Primary status with icon and reasoning"""
+
     status: str  # balanced, overloaded, blocked, etc.
     icon: str  # 🟢, 🟠, 🔴, 🚀, 🔥, 🧑‍🏫
     reasoning: str
@@ -45,6 +49,7 @@ class PrimaryStatusResponse(BaseModel):
 # === Copilot Insights ===
 class CopilotInsight(BaseModel):
     """A single copilot insight"""
+
     type: str  # recognition, risk, health, collaboration
     signal: str  # The observation
     recommendation: str  # The action
@@ -55,6 +60,7 @@ class CopilotInsight(BaseModel):
 
 class CopilotInsightsResponse(BaseModel):
     """All copilot insights"""
+
     insights: List[CopilotInsight]
     generated_at: datetime
 
@@ -62,6 +68,7 @@ class CopilotInsightsResponse(BaseModel):
 # === Metrics Quadrants ===
 class VelocityMetrics(BaseModel):
     """Velocity quadrant metrics"""
+
     merged_prs_by_week: List[Dict[str, Any]]  # [{week, count}]
     avg_cycle_time_trend: List[Dict[str, Any]]  # [{date, hours}]
     total_merged_last_30_days: int
@@ -70,6 +77,7 @@ class VelocityMetrics(BaseModel):
 
 class WorkFocusMetrics(BaseModel):
     """Work focus quadrant metrics"""
+
     distribution: Dict[str, float]  # {feature: 60%, bug: 30%, chore: 10%}
     codebase_familiarity_percentage: float
     new_modules_touched: int
@@ -77,6 +85,7 @@ class WorkFocusMetrics(BaseModel):
 
 class QualityMetrics(BaseModel):
     """Quality quadrant metrics"""
+
     rework_rate_percentage: float
     rework_trend: str  # "up", "down", "stable"
     revert_count: int
@@ -86,6 +95,7 @@ class QualityMetrics(BaseModel):
 
 class CollaborationMetrics(BaseModel):
     """Collaboration quadrant metrics"""
+
     review_velocity_median_hours: Optional[float]
     collaboration_reach: int  # Number of teammates helped
     top_collaborators: List[Dict[str, Any]]  # [{user_id, name, avatar, count}]
@@ -93,6 +103,7 @@ class CollaborationMetrics(BaseModel):
 
 class MetricsResponse(BaseModel):
     """All quadrant metrics"""
+
     velocity: VelocityMetrics
     work_focus: WorkFocusMetrics
     quality: QualityMetrics
@@ -102,6 +113,7 @@ class MetricsResponse(BaseModel):
 # === PR Card Schemas ===
 class PRCardBrief(BaseModel):
     """Brief PR information for cards"""
+
     id: int
     number: int
     title: str
@@ -122,6 +134,7 @@ class PRCardBrief(BaseModel):
 
 class PRsResponse(BaseModel):
     """List of PRs for a team member"""
+
     authored: List[PRCardBrief]
     assigned_for_review: List[PRCardBrief]
     total_authored: int
@@ -131,6 +144,7 @@ class PRsResponse(BaseModel):
 # === Timeline Events ===
 class TimelineEvent(BaseModel):
     """A single timeline event"""
+
     id: int
     type: str  # commit, pr_opened, review_submitted, etc.
     timestamp: datetime
@@ -145,6 +159,7 @@ class TimelineEvent(BaseModel):
 
 class TimelineResponse(BaseModel):
     """Timeline/narrative view"""
+
     events: List[TimelineEvent]
     date_range: Dict[str, str]  # {start, end}
     total_events: int
@@ -153,6 +168,7 @@ class TimelineResponse(BaseModel):
 # === Summary Response (combines multiple sections) ===
 class TeamMemberSummaryResponse(BaseModel):
     """Complete summary for Team Member Page"""
+
     user: UserBrief
     primary_status: PrimaryStatusResponse
     kpi_tiles: KPITilesResponse
@@ -161,6 +177,7 @@ class TeamMemberSummaryResponse(BaseModel):
 # === Full Team Member Profile ===
 class TeamMemberProfileResponse(BaseModel):
     """Complete team member profile"""
+
     id: int
     user_id: int
     user: UserBrief
@@ -168,12 +185,11 @@ class TeamMemberProfileResponse(BaseModel):
     last_active_at: Optional[datetime]
     github_username: Optional[str]
     github_avatar_url: Optional[str]
-    
+
     # Computed metrics
     wip_count: int
     reviews_pending_count: int
     unresolved_discussions_count: int
-    
+
     class Config:
         from_attributes = True
-

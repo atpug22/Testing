@@ -6,10 +6,24 @@ from statistics import mean
 from typing import Dict, Iterable, List, Optional, Tuple
 
 try:
-    from .models import ContributorMetrics, GitHubUser, Metrics, PullRequest, RepoDataset, TeamSummary
+    from .models import (
+        ContributorMetrics,
+        GitHubUser,
+        Metrics,
+        PullRequest,
+        RepoDataset,
+        TeamSummary,
+    )
 except ImportError:
     # Fallback for direct import
-    from models import ContributorMetrics, GitHubUser, Metrics, PullRequest, RepoDataset, TeamSummary
+    from models import (
+        ContributorMetrics,
+        GitHubUser,
+        Metrics,
+        PullRequest,
+        RepoDataset,
+        TeamSummary,
+    )
 
 
 def _week_start(dt: datetime) -> str:
@@ -17,7 +31,9 @@ def _week_start(dt: datetime) -> str:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     iso_weekday = (dt.weekday() + 1) % 7  # Monday=0; keep Monday start
-    week_start = dt.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=iso_weekday)
+    week_start = dt.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(
+        days=iso_weekday
+    )
     return week_start.date().isoformat()
 
 
@@ -56,7 +72,9 @@ def compute_metrics(dataset: RepoDataset) -> Metrics:
     contributors: List[ContributorMetrics] = []
 
     # Build commit frequency per user per week from dataset.commits
-    commit_week_counts_by_user: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    commit_week_counts_by_user: Dict[str, Dict[str, int]] = defaultdict(
+        lambda: defaultdict(int)
+    )
     for c in dataset.commits:
         if not c.author or not c.author.login:
             continue
@@ -121,17 +139,37 @@ def compute_metrics(dataset: RepoDataset) -> Metrics:
         contributor = ContributorMetrics(
             user=author_prs[0].user,
             pr_throughput_by_week={
-                w: {"created": created_counts_by_week.get(w, 0), "merged": merged_counts_by_week.get(w, 0)}
-                for w in sorted(set(list(created_counts_by_week.keys()) + list(merged_counts_by_week.keys())))
+                w: {
+                    "created": created_counts_by_week.get(w, 0),
+                    "merged": merged_counts_by_week.get(w, 0),
+                }
+                for w in sorted(
+                    set(
+                        list(created_counts_by_week.keys())
+                        + list(merged_counts_by_week.keys())
+                    )
+                )
             },
-            avg_time_to_merge_hours=mean(time_to_merge_values) if time_to_merge_values else None,
-            avg_time_in_review_hours=mean(time_in_review_values) if time_in_review_values else None,
-            avg_review_to_merge_hours=mean(review_to_merge_values) if review_to_merge_values else None,
+            avg_time_to_merge_hours=mean(time_to_merge_values)
+            if time_to_merge_values
+            else None,
+            avg_time_in_review_hours=mean(time_in_review_values)
+            if time_in_review_values
+            else None,
+            avg_review_to_merge_hours=mean(review_to_merge_values)
+            if review_to_merge_values
+            else None,
             avg_pr_size_lines=mean(pr_size_values) if pr_size_values else None,
             avg_pr_files_changed=mean(pr_files_values) if pr_files_values else None,
-            avg_review_cycles=mean(review_cycles_values) if review_cycles_values else None,
-            commit_frequency_by_week=dict(sorted(commit_week_counts_by_user.get(author, {}).items())),
-            avg_wip_time_hours=mean(wip_times_by_author.get(author, [])) if wip_times_by_author.get(author) else None,
+            avg_review_cycles=mean(review_cycles_values)
+            if review_cycles_values
+            else None,
+            commit_frequency_by_week=dict(
+                sorted(commit_week_counts_by_user.get(author, {}).items())
+            ),
+            avg_wip_time_hours=mean(wip_times_by_author.get(author, []))
+            if wip_times_by_author.get(author)
+            else None,
         )
         contributors.append(contributor)
 
@@ -143,8 +181,12 @@ def compute_metrics(dataset: RepoDataset) -> Metrics:
         total_merged_prs=sum(1 for pr in prs if pr.merged_at is not None),
         total_commits=len(dataset.commits),
         avg_time_to_merge_hours=mean(all_time_to_merge) if all_time_to_merge else None,
-        avg_time_in_review_hours=mean(all_time_in_review) if all_time_in_review else None,
-        avg_review_to_merge_hours=mean(all_review_to_merge) if all_review_to_merge else None,
+        avg_time_in_review_hours=mean(all_time_in_review)
+        if all_time_in_review
+        else None,
+        avg_review_to_merge_hours=mean(all_review_to_merge)
+        if all_review_to_merge
+        else None,
         avg_pr_size_lines=mean(all_pr_sizes) if all_pr_sizes else None,
         avg_pr_files_changed=mean(all_pr_files) if all_pr_files else None,
     )
@@ -155,4 +197,4 @@ def compute_metrics(dataset: RepoDataset) -> Metrics:
         owner=dataset.owner,
         team_summary=team_summary,
         contributors=sorted(contributors, key=lambda c: c.user.login.lower()),
-    ) 
+    )

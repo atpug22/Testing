@@ -20,4 +20,4 @@ export function BarChart({ labels, datasets }: { labels: string[]; datasets: Arr
 	}
 	const options = { responsive: true, maintainAspectRatio: false } as const
 	return <Bar data={data} options={options} />
-} 
+}

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from sqlalchemy import Select
 from sqlalchemy.orm import joinedload
 
@@ -12,10 +13,7 @@ class EventRepository(BaseRepository[Event]):
     """
 
     async def get_by_team_member(
-        self, 
-        team_member_id: int, 
-        limit: int = 50,
-        join_: set[str] | None = None
+        self, team_member_id: int, limit: int = 50, join_: set[str] | None = None
     ) -> list[Event]:
         """
         Get events for a team member, ordered by timestamp desc.
@@ -40,7 +38,7 @@ class EventRepository(BaseRepository[Event]):
         team_member_id: int,
         start_date: datetime,
         end_date: datetime,
-        join_: set[str] | None = None
+        join_: set[str] | None = None,
     ) -> list[Event]:
         """
         Get events within a date range.
@@ -55,7 +53,7 @@ class EventRepository(BaseRepository[Event]):
         query = query.filter(
             Event.team_member_id == team_member_id,
             Event.timestamp >= start_date,
-            Event.timestamp <= end_date
+            Event.timestamp <= end_date,
         )
         query = query.order_by(Event.timestamp.desc())
 
@@ -65,10 +63,7 @@ class EventRepository(BaseRepository[Event]):
         return await self._all(query)
 
     async def get_recent_events(
-        self,
-        team_member_id: int,
-        days: int = 7,
-        join_: set[str] | None = None
+        self, team_member_id: int, days: int = 7, join_: set[str] | None = None
     ) -> list[Event]:
         """
         Get recent events for the last N days.
@@ -80,15 +75,9 @@ class EventRepository(BaseRepository[Event]):
         """
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=days)
-        
-        return await self.get_by_date_range(
-            team_member_id, 
-            start_date, 
-            end_date, 
-            join_
-        )
+
+        return await self.get_by_date_range(team_member_id, start_date, end_date, join_)
 
     def _join_team_member(self, query: Select) -> Select:
         """Join team member."""
         return query.options(joinedload(Event.team_member))
-

@@ -122,4 +122,3 @@ def downgrade():
     op.drop_column("users", "manager_id")
     op.drop_column("users", "role")
     # ### end Alembic commands ###
-

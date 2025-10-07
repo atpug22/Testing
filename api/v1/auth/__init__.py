@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from .github import router as github_router
 from .email import router as email_router
+from .github import router as github_router
 from .me import router as me_router
 
 router = APIRouter(prefix="/auth")

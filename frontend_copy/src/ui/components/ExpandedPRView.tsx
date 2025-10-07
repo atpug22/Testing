@@ -45,13 +45,13 @@ const formatTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
   const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-  
+
   if (diffInHours < 1) return 'Just now';
   if (diffInHours < 24) return `${diffInHours}h ago`;
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) return `${diffInDays}d ago`;
-  
+
   const diffInWeeks = Math.floor(diffInDays / 7);
   return `${diffInWeeks}w ago`;
 };
@@ -136,7 +136,7 @@ export const ExpandedPRView: React.FC<ExpandedPRViewProps> = ({ pr, onClose }) =
                 {(pr.delivery_risk_score || 0).toFixed(1)}/100
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-                <div 
+                <div
                   className={`h-3 rounded-full ${
                     (pr.delivery_risk_score || 0) >= 80 ? 'bg-red-500' :
                     (pr.delivery_risk_score || 0) >= 60 ? 'bg-orange-500' :
@@ -165,7 +165,7 @@ export const ExpandedPRView: React.FC<ExpandedPRViewProps> = ({ pr, onClose }) =
                 >
                   View PR on GitHub
                 </a>
-                <button 
+                <button
                   onClick={() => {
                     navigator.clipboard.writeText(pr.url || '');
                     // You could add a toast notification here
@@ -442,9 +442,9 @@ export const ExpandedPRView: React.FC<ExpandedPRViewProps> = ({ pr, onClose }) =
                         {pr.detailed_info.files.map((file, idx) => (
                           <tr key={idx} className="hover:bg-gray-50">
                             <td className="px-4 py-2 text-sm">
-                              <a 
-                                href={file.blob_url || '#'} 
-                                target="_blank" 
+                              <a
+                                href={file.blob_url || '#'}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:underline font-mono text-xs"
                               >
@@ -479,7 +479,7 @@ export const ExpandedPRView: React.FC<ExpandedPRViewProps> = ({ pr, onClose }) =
               {pr.detailed_info.ci_checks && pr.detailed_info.ci_checks.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    🔄 CI/CD Checks 
+                    🔄 CI/CD Checks
                     <span className={`ml-2 text-sm font-normal ${
                       pr.detailed_info.ci_status === 'success' ? 'text-green-600' :
                       pr.detailed_info.ci_status === 'failure' ? 'text-red-600' :
@@ -509,9 +509,9 @@ export const ExpandedPRView: React.FC<ExpandedPRViewProps> = ({ pr, onClose }) =
                           </div>
                         </div>
                         {check.html_url && (
-                          <a 
-                            href={check.html_url} 
-                            target="_blank" 
+                          <a
+                            href={check.html_url}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline text-sm"
                           >
@@ -552,9 +552,9 @@ export const ExpandedPRView: React.FC<ExpandedPRViewProps> = ({ pr, onClose }) =
                             </div>
                           )}
                         </div>
-                        <a 
-                          href={issue.url} 
-                          target="_blank" 
+                        <a
+                          href={issue.url}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline text-sm ml-4"
                         >
@@ -734,4 +734,4 @@ export const ExpandedPRView: React.FC<ExpandedPRViewProps> = ({ pr, onClose }) =
   );
 };
 
-export default ExpandedPRView; 
+export default ExpandedPRView;
